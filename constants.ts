@@ -7,23 +7,36 @@ export const MODEL_VERSION = 'v1.05';
 
 // 预置美学图片池 (使用符合暗黑/工业/重型美学的抽象图)
 const IMAGE_POOLS: Record<string, string[]> = {
-  EBOG: [
-    'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1470790376778-a9fbc86d70e2?q=80&w=1000&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop'
-  ],
-  ICXG: [
-    'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=1000&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1502134249126-9f3755a50d78?q=80&w=1000&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1533132248148-daafaeae082a?q=80&w=1000&auto=format&fit=crop'
-  ],
-  // ... 其他类型使用通用池作为演示，实际应用中可为每个code配置专属池
+  // 工业/秩序/冷峻
+  EBOG: ['/HMBTI/images/industrial.png', '/HMBTI/images/industrial_2.png', '/HMBTI/images/industrial_3.png', '/HMBTI/images/industrial.png'],
+  ICOG: ['/HMBTI/images/industrial.png', '/HMBTI/images/industrial_2.png', '/HMBTI/images/industrial_3.png', '/HMBTI/images/industrial.png'],
+  IBOG: ['/HMBTI/images/industrial.png', '/HMBTI/images/industrial_2.png', '/HMBTI/images/industrial_3.png', '/HMBTI/images/industrial.png'],
+  IBXG: ['/HMBTI/images/industrial.png', '/HMBTI/images/industrial_2.png', '/HMBTI/images/industrial_3.png', '/HMBTI/images/industrial.png'],
+
+  // 混沌/失真/爆发
+  ECXG: ['/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png'],
+  ECXF: ['/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png'],
+  ICXG: ['/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png'],
+  ICXF: ['/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png', '/HMBTI/images/chaos.png'],
+
+  // 氛围/虚无/内省
+  IBOF: ['/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png'],
+  ICOF: ['/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png'],
+  IBXF: ['/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png', '/HMBTI/images/ethereal.png'],
+
+  // 重型/力量/推进
+  ECOG: ['/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png'],
+  ECOF: ['/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png'],
+  EBOF: ['/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png'],
+  EBXF: ['/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png'],
+  EBXG: ['/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png', '/HMBTI/images/heavy.png'],
 };
 
 const DEFAULT_POOL = [
-  'https://images.unsplash.com/photo-1514525253344-f81bad3b7c2a?q=80&w=1000&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1000&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1536697246747-09196623285a?q=80&w=1000&auto=format&fit=crop'
+  '/HMBTI/images/industrial.png',
+  '/HMBTI/images/chaos.png',
+  '/HMBTI/images/ethereal.png',
+  '/HMBTI/images/heavy.png'
 ];
 
 export const GET_RANDOM_IMAGE = (type: string) => {
@@ -54,55 +67,55 @@ export const DIMENSION_DESCRIPTIONS = {
   }
 };
 
-export const QUESTION_BANK: Question[] = [
+export const SCORING_MAP: Record<string, { dimension: string; weight: number }> = {
   // I_E
-  { id: 'ie-1', dimension: 'I_E', text: '听重型音乐时，我更倾向于选择一个不被打扰的空间。', isActive: true, weight: 1 },
-  { id: 'ie-2', dimension: 'I_E', text: '如果环境不允许我自由活动，我会觉得音乐体验被削弱了。', isActive: true, weight: -1 },
-  { id: 'ie-3', dimension: 'I_E', text: '听音乐时，我很少同时关注周围发生的事情。', isActive: true, weight: 1 },
-  { id: 'ie-4', dimension: 'I_E', text: '我听音乐时，会自然注意到他人的反应或现场氛围。', isActive: true, weight: -1 },
-  { id: 'ie-5', dimension: 'I_E', text: '听完真正击中我的音乐后，我通常会变得更安静。', isActive: true, weight: 1 },
-  { id: 'ie-6', dimension: 'I_E', text: '听完音乐后，我会有想说话、想行动的冲动。', isActive: true, weight: -1 },
-  { id: 'ie-7', dimension: 'I_E', text: '我很少需要向别人解释我为什么喜欢某种音乐。', isActive: true, weight: 1 },
-  { id: 'ie-8', dimension: 'I_E', text: '和别人一起分享音乐体验，会让我感觉更完整。', isActive: true, weight: -1 },
-  { id: 'ie-9', dimension: 'I_E', text: '即使错过一场重要现场，只要音乐本身还在，我可以接受。', isActive: true, weight: 1 },
-  { id: 'ie-10', dimension: 'I_E', text: '如果没能亲身参与现场，我会觉得“少了点什么”。', isActive: true, weight: -1 },
+  '1e000001-0000-4000-8000-000000000001': { dimension: 'I_E', weight: 1 },
+  '1e000002-0000-4000-8000-000000000002': { dimension: 'I_E', weight: -1 },
+  '1e000003-0000-4000-8000-000000000003': { dimension: 'I_E', weight: 1 },
+  '1e000004-0000-4000-8000-000000000004': { dimension: 'I_E', weight: -1 },
+  '1e000005-0000-4000-8000-000000000005': { dimension: 'I_E', weight: 1 },
+  '1e000006-0000-4000-8000-000000000006': { dimension: 'I_E', weight: -1 },
+  '1e000007-0000-4000-8000-000000000007': { dimension: 'I_E', weight: 1 },
+  '1e000008-0000-4000-8000-000000000008': { dimension: 'I_E', weight: -1 },
+  '1e000009-0000-4000-8000-000000000009': { dimension: 'I_E', weight: 1 },
+  '1e00000a-0000-4000-8000-00000000000a': { dimension: 'I_E', weight: -1 },
 
   // C_B
-  { id: 'cb-1', dimension: 'C_B', text: '我通常在情绪已经被触发后，才会打开重型音乐。', isActive: true, weight: -1 },
-  { id: 'cb-2', dimension: 'C_B', text: '即使情绪平稳，我也会持续听某些音乐作为背景支撑。', isActive: true, weight: 1 },
-  { id: 'cb-3', dimension: 'C_B', text: '听完音乐后，我更关心“舒服没舒服”。', isActive: true, weight: -1 },
-  { id: 'cb-4', dimension: 'C_B', text: '听完音乐后，我更关心“是否更清楚自己在做什么”。', isActive: true, weight: 1 },
-  { id: 'cb-5', dimension: 'C_B', text: '如果情绪已经通过别的方式释放，我对音乐的需求会明显下降。', isActive: true, weight: -1 },
-  { id: 'cb-6', dimension: 'C_B', text: '即使情绪稳定，我也会因为认同而回到某些音乐。', isActive: true, weight: 1 },
-  { id: 'cb-7', dimension: 'C_B', text: '我很少把音乐当成长期的一部分来看待。', isActive: true, weight: -1 },
-  { id: 'cb-8', dimension: 'C_B', text: '有些音乐已经融入了我对自己的理解。', isActive: true, weight: 1 },
-  { id: 'cb-9', dimension: 'C_B', text: '一段时间不听重型音乐，对我来说问题不大。', isActive: true, weight: -1 },
-  { id: 'cb-10', dimension: 'C_B', text: '长期脱离某类音乐，会让我感觉自己被抽空了一部分。', isActive: true, weight: 1 },
+  'c0000001-0000-4000-8000-000000000001': { dimension: 'C_B', weight: -1 },
+  'c0000002-0000-4000-8000-000000000002': { dimension: 'C_B', weight: 1 },
+  'c0000003-0000-4000-8000-000000000003': { dimension: 'C_B', weight: -1 },
+  'c0000004-0000-4000-8000-000000000004': { dimension: 'C_B', weight: 1 },
+  'c0000005-0000-4000-8000-000000000005': { dimension: 'C_B', weight: -1 },
+  'c0000006-0000-4000-8000-000000000006': { dimension: 'C_B', weight: 1 },
+  'c0000007-0000-4000-8000-000000000007': { dimension: 'C_B', weight: -1 },
+  'c0000008-0000-4000-8000-000000000008': { dimension: 'C_B', weight: 1 },
+  'c0000009-0000-4000-8000-000000000009': { dimension: 'C_B', weight: -1 },
+  'c000000a-0000-4000-8000-00000000000a': { dimension: 'C_B', weight: 1 },
 
   // O_X
-  { id: 'ox-1', dimension: 'O_X', text: '结构清晰会让我更容易沉浸。', isActive: true, weight: 1 },
-  { id: 'ox-2', dimension: 'O_X', text: '不确定性本身会让我兴奋。', isActive: true, weight: -1 },
-  { id: 'ox-3', dimension: 'O_X', text: '我对“听得懂”这件事很看重。', isActive: true, weight: 1 },
-  { id: 'ox-4', dimension: 'O_X', text: '即使听不懂，只要够极端我也愿意继续听。', isActive: true, weight: -1 },
-  { id: 'ox-5', dimension: 'O_X', text: '如果一首歌显得失控，我会本能地警惕。', isActive: true, weight: 1 },
-  { id: 'ox-6', dimension: 'O_X', text: '我享受音乐中那种“随时可能出事”的感觉。', isActive: true, weight: -1 },
-  { id: 'ox-7', dimension: 'O_X', text: '我更容易反复听结构稳定的作品。', isActive: true, weight: 1 },
-  { id: 'ox-8', dimension: 'O_X', text: '我更容易反复听充满变数的作品。', isActive: true, weight: -1 },
-  { id: 'ox-9', dimension: 'O_X', text: '我更欣赏对声音的掌控力。', isActive: true, weight: 1 },
-  { id: 'ox-10', dimension: 'O_X', text: '我更欣赏突破边界的冒险。', isActive: true, weight: -1 },
+  '0a000001-0000-4000-8000-000000000001': { dimension: 'O_X', weight: 1 },
+  '0a000002-0000-4000-8000-000000000002': { dimension: 'O_X', weight: -1 },
+  '0a000003-0000-4000-8000-000000000003': { dimension: 'O_X', weight: 1 },
+  '0a000004-0000-4000-8000-000000000004': { dimension: 'O_X', weight: -1 },
+  '0a000005-0000-4000-8000-000000000005': { dimension: 'O_X', weight: 1 },
+  '0a000006-0000-4000-8000-000000000006': { dimension: 'O_X', weight: -1 },
+  '0a000007-0000-4000-8000-000000000007': { dimension: 'O_X', weight: 1 },
+  '0a000008-0000-4000-8000-000000000008': { dimension: 'O_X', weight: -1 },
+  '0a000009-0000-4000-8000-000000000009': { dimension: 'O_X', weight: 1 },
+  '0a00000a-0000-4000-8000-00000000000a': { dimension: 'O_X', weight: -1 },
 
   // G_F
-  { id: 'gf-1', dimension: 'G_F', text: '我判断一支乐队时，会参考它来自哪里、继承了什么。', isActive: true, weight: 1 },
-  { id: 'gf-2', dimension: 'G_F', text: '我判断一支乐队时，更看重它现在在做什么。', isActive: true, weight: -1 },
-  { id: 'gf-3', dimension: 'G_F', text: '我对“这个不算那个风格”的说法并不反感。', isActive: true, weight: 1 },
-  { id: 'gf-4', dimension: 'G_F', text: '我对风格标签的争论通常不太在意。', isActive: true, weight: -1 },
-  { id: 'gf-5', dimension: 'G_F', text: '历史和传承是音乐价值的重要组成部分。', isActive: true, weight: 1 },
-  { id: 'gf-6', dimension: 'G_F', text: '历史不应该成为创作的负担。', isActive: true, weight: -1 },
-  { id: 'gf-7', dimension: 'G_F', text: '我对变化太快的风格会感到不适。', isActive: true, weight: 1 },
-  { id: 'gf-8', dimension: 'G_F', text: '我对不断变化的风格反而更有兴趣。', isActive: true, weight: -1 },
-  { id: 'gf-9', dimension: 'G_F', text: '我更信任时间检验过的东西。', isActive: true, weight: 1 },
-  { id: 'gf-10', dimension: 'G_F', text: '我更信任当下的表达强度。', isActive: true, weight: -1 },
-];
+  'f0000001-0000-4000-8000-000000000001': { dimension: 'G_F', weight: 1 },
+  'f0000002-0000-4000-8000-000000000002': { dimension: 'G_F', weight: -1 },
+  'f0000003-0000-4000-8000-000000000003': { dimension: 'G_F', weight: 1 },
+  'f0000004-0000-4000-8000-000000000004': { dimension: 'G_F', weight: -1 },
+  'f0000005-0000-4000-8000-000000000005': { dimension: 'G_F', weight: 1 },
+  'f0000006-0000-4000-8000-000000000006': { dimension: 'G_F', weight: -1 },
+  'f0000007-0000-4000-8000-000000000007': { dimension: 'G_F', weight: 1 },
+  'f0000008-0000-4000-8000-000000000008': { dimension: 'G_F', weight: -1 },
+  'f0000009-0000-4000-8000-000000000009': { dimension: 'G_F', weight: 1 },
+  'f000000a-0000-4000-8000-00000000000a': { dimension: 'G_F', weight: -1 },
+};
 
 export const TYPE_DETAILS: TypeDetail[] = [
   { code: 'EBOG', name: '集体意志', description: '人群能量与集体意志的象征，握拳般的几何形态，规整而短促的节奏线条，坚硬、直接、冲击感强', promptSuffix: '握拳般的几何形态，规整而短促的节奏线条，坚硬、直接、冲击感强' },

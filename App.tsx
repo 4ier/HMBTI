@@ -1,17 +1,21 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { HashRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { 
-  QUESTION_BANK, 
-  QUESTIONS_PER_DIMENSION, 
+import { SharedResultPage } from './components/SharedResultPage';
+import { ResultView } from './components/ResultView';
+import {
+  QUESTIONS_PER_DIMENSION,
   MAX_SKIP_PER_DIMENSION,
   TYPE_DETAILS,
   DIMENSION_DESCRIPTIONS,
   MODEL_VERSION,
-  GET_RANDOM_IMAGE
+  GET_RANDOM_IMAGE,
+  SCORING_MAP
 } from './constants';
 import { Question, Answer, TestResult, PostSurvey, Dimension } from './types';
 import { calculateResult } from './lib/scoring';
+import { fetchQuestions, submitTest } from './services/api';
 
 type Step = 'welcome' | 'test' | 'survey' | 'result' | 'admin';
 
@@ -20,7 +24,7 @@ const SECRET_CODE = 'HMBTI-999';
 const GEO_LOG_KEY = 'hmbti_geo_history';
 
 // 简易中国地图组件
-const ChinaHeatMap: React.FC<{ points: {lat: number, lng: number}[] }> = ({ points }) => {
+const ChinaHeatMap: React.FC<{ points: { lat: number, lng: number }[] }> = ({ points }) => {
   const mockPoints = [
     { lat: 39.9, lng: 116.4, intensity: 0.8 },
     { lat: 31.2, lng: 121.5, intensity: 0.9 },
@@ -65,7 +69,7 @@ const ChinaHeatMap: React.FC<{ points: {lat: number, lng: number}[] }> = ({ poin
   );
 };
 
-const App: React.FC = () => {
+const MainFlow: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>('welcome');
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
@@ -75,22 +79,25 @@ const App: React.FC = () => {
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('Initializing Neural Renderer...');
-  const [geoPoints, setGeoPoints] = useState<{lat: number, lng: number}[]>([]);
-  
+  const [geoPoints, setGeoPoints] = useState<{ lat: number, lng: number }[]>([]);
+
   const versionClickCount = useRef(0);
   const lastClickTime = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
     const isAuth = localStorage.getItem(ADMIN_OVERRIDE_KEY);
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const savedGeo = localStorage.getItem(GEO_LOG_KEY);
     if (savedGeo) setGeoPoints(JSON.parse(savedGeo));
 
     if (params.get('admin') === 'true' && isAuth === 'true') {
       setCurrentStep('admin');
     }
-  }, []);
+  }, [location]);
 
   const handleVersionClick = () => {
     const now = Date.now();
@@ -124,19 +131,32 @@ const App: React.FC = () => {
     }
   };
 
-  const startTest = () => {
+  const startTest = async () => {
     captureLocation();
-    const shuffled: Question[] = [];
-    (['I_E', 'C_B', 'O_X', 'G_F'] as Dimension[]).forEach(dim => {
-      const dimQs = QUESTION_BANK.filter(q => q.dimension === dim && q.isActive);
-      const chosen = [...dimQs].sort(() => Math.random() - 0.5).slice(0, QUESTIONS_PER_DIMENSION);
-      shuffled.push(...chosen);
-    });
-    setSelectedQuestions(shuffled.sort(() => Math.random() - 0.5));
-    setCurrentQuestionIdx(0);
-    setAnswers([]);
-    setStartTime(Date.now());
-    setCurrentStep('test');
+    setLoading(true);
+    setLoadingText('Initializing Sonic Matrix...');
+
+    try {
+      const allQuestions = await fetchQuestions();
+
+      const shuffled: Question[] = [];
+      (['I_E', 'C_B', 'O_X', 'G_F'] as Dimension[]).forEach(dim => {
+        const dimQs = allQuestions.filter(q => q.dimension === dim && q.isActive);
+        const chosen = [...dimQs].sort(() => Math.random() - 0.5).slice(0, QUESTIONS_PER_DIMENSION);
+        shuffled.push(...chosen);
+      });
+
+      setSelectedQuestions(shuffled.sort(() => Math.random() - 0.5));
+      setCurrentQuestionIdx(0);
+      setAnswers([]);
+      setStartTime(Date.now());
+      setCurrentStep('test');
+    } catch (err) {
+      alert("Failed to load neural matrix. Please refresh.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAnswer = (value: number | null, skipped: boolean = false) => {
@@ -159,9 +179,33 @@ const App: React.FC = () => {
     setCurrentStep('survey');
   };
 
-  const completeSurvey = (surveyData: Partial<PostSurvey>) => {
+  const completeSurvey = async (surveyData: Partial<PostSurvey>) => {
+    // Basic survey data construction
+    const fullSurvey: PostSurvey = {
+      testId: result!.id,
+      role: 'Listener', // Default for MVP quick click
+      engagementLevel: '3', // Default
+      answerBasis: 'Intuition', // Default
+      ...surveyData
+    } as PostSurvey;
+
+    // Submit data silently or blocking? 
+    // MVP: Fire and forget or simple await without blocking UI too much
+    // We want to simulate rendering immediately.
+
+    // Trigger simulation first
     setCurrentStep('result');
     simulateRendering(result!.type);
+
+    // Async submit
+    try {
+      if (result) {
+        await submitTest(result, answers, fullSurvey);
+      }
+    } catch (err) {
+      console.error("Transmission failed:", err);
+      // Don't interrupt the user experience
+    }
   };
 
   // 伪造极其真实的AI渲染过程
@@ -174,7 +218,7 @@ const App: React.FC = () => {
       'Synthesizing Visual Identity...',
       'Finalizing Neural Projection...'
     ];
-    
+
     let currentStepProgress = 0;
     const interval = setInterval(() => {
       if (currentStepProgress < steps.length) {
@@ -196,8 +240,8 @@ const App: React.FC = () => {
       <div className="flex-shrink-0 mb-6 flex justify-between items-center border-b border-neutral-900 pb-4">
         <h2 className="text-amber-500 font-bold uppercase tracking-widest">[ SYSTEM_DIAGNOSTICS ]</h2>
         <div className="flex space-x-2">
-            <button onClick={() => { localStorage.removeItem(ADMIN_OVERRIDE_KEY); setCurrentStep('welcome'); }} className="text-red-900 hover:text-red-500 border border-red-950 px-3 py-1">REVOKE_AUTH</button>
-            <button onClick={() => setCurrentStep('welcome')} className="text-neutral-500 hover:text-white border border-neutral-800 px-3 py-1">CLOSE</button>
+          <button onClick={() => { localStorage.removeItem(ADMIN_OVERRIDE_KEY); setCurrentStep('welcome'); }} className="text-red-900 hover:text-red-500 border border-red-950 px-3 py-1">REVOKE_AUTH</button>
+          <button onClick={() => setCurrentStep('welcome')} className="text-neutral-500 hover:text-white border border-neutral-800 px-3 py-1">CLOSE</button>
         </div>
       </div>
       <div className="flex-grow overflow-y-auto space-y-8 pr-2 custom-scrollbar">
@@ -217,7 +261,7 @@ const App: React.FC = () => {
         </section>
         <section className="pb-10">
           <h3 className="text-neutral-400 mb-3 border-l-2 border-amber-500 pl-2 uppercase">Data_Management</h3>
-          <button onClick={() => { if(confirm("RESET ALL LOCAL DATA?")) { localStorage.clear(); window.location.reload(); } }} className="w-full py-4 border border-red-900/50 text-red-500 hover:bg-red-500 hover:text-white transition-all">PURGE_ALL_LOCAL_STORAGE</button>
+          <button onClick={() => { if (confirm("RESET ALL LOCAL DATA?")) { localStorage.clear(); window.location.reload(); } }} className="w-full py-4 border border-red-900/50 text-red-500 hover:bg-red-500 hover:text-white transition-all">PURGE_ALL_LOCAL_STORAGE</button>
         </section>
       </div>
     </div>
@@ -236,9 +280,9 @@ const App: React.FC = () => {
       <div className="w-full space-y-3 mb-12 px-2">
         {['基于你的长期状态作答', '可以跳过不适合你的题目', '整个过程约 3-5 分钟'].map((text, i) => (
           <div key={i} className="flex items-center space-x-3">
-             <span className="text-[9px] font-accent text-neutral-500 font-bold uppercase">Ready_0{i+1}</span>
-             <div className="h-px flex-grow bg-neutral-900"></div>
-             <span className="text-[11px] text-neutral-400 uppercase tracking-widest">{text}</span>
+            <span className="text-[9px] font-accent text-neutral-500 font-bold uppercase">Ready_0{i + 1}</span>
+            <div className="h-px flex-grow bg-neutral-900"></div>
+            <span className="text-[11px] text-neutral-400 uppercase tracking-widest">{text}</span>
           </div>
         ))}
       </div>
@@ -249,7 +293,10 @@ const App: React.FC = () => {
   const renderTest = () => {
     const q = selectedQuestions[currentQuestionIdx];
     const progress = ((currentQuestionIdx + 1) / selectedQuestions.length) * 100;
-    const currentDimAnswers = answers.filter(a => QUESTION_BANK.find(orig => orig.id === a.questionId)?.dimension === q.dimension);
+    const currentDimAnswers = answers.filter(a => {
+      const dim = SCORING_MAP[a.questionId]?.dimension;
+      return dim === q.dimension;
+    });
     const skipCount = currentDimAnswers.filter(a => a.skipped).length;
     const canSkip = skipCount < MAX_SKIP_PER_DIMENSION;
 
@@ -301,7 +348,7 @@ const App: React.FC = () => {
           <label className="block text-[10px] text-neutral-500 font-bold uppercase mb-4 tracking-widest">Engagement</label>
           <div className="grid grid-cols-3 gap-2">
             {['Low', 'Core', 'High'].map(l => (
-               <button key={l} className="py-3 border border-neutral-900 bg-neutral-950 hover:border-white transition-all text-[10px] font-bold uppercase">{l}</button>
+              <button key={l} className="py-3 border border-neutral-900 bg-neutral-950 hover:border-white transition-all text-[10px] font-bold uppercase">{l}</button>
             ))}
           </div>
         </div>
@@ -310,80 +357,34 @@ const App: React.FC = () => {
     </div>
   );
 
-  const renderResult = () => {
-    if (!result) return null;
-    const typeDetail = TYPE_DETAILS.find(d => d.code === result.type);
-    
-    return (
-      <div className="flex-grow w-full flex flex-col overflow-hidden relative">
-        <div ref={scrollRef} className="flex-grow overflow-y-auto pb-10 pr-1 select-none">
-          <div className="flex flex-col items-center">
-            <div className="w-full aspect-square max-w-sm overflow-hidden bg-black border border-neutral-900 relative mb-12 group">
-              <div className="bracket-tl !border-[#333]"></div><div className="bracket-tr !border-[#333]"></div>
-              <div className="bracket-bl !border-[#333]"></div><div className="bracket-br !border-[#333]"></div>
-              {loading ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-neutral-500">
-                  <div className="w-8 h-8 border border-neutral-900 border-t-white rounded-full animate-spin mb-4"></div>
-                  <span className="text-[8px] uppercase tracking-[0.4em] font-accent animate-pulse">{loadingText}</span>
-                </div>
-              ) : resultImage ? (
-                <img src={resultImage} alt="HMBTI Vision" className="w-full h-full object-cover grayscale opacity-60 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-[2s]" />
-              ) : null}
-            </div>
-
-            <div className="text-center mb-16 relative w-full">
-               <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[15vw] font-black font-accent opacity-5 tracking-tighter pointer-events-none">{result.type}</span>
-               <h3 className="text-7xl font-black font-accent tracking-tighter italic text-white leading-none relative z-10">{result.type}</h3>
-               <h4 className="text-lg font-bold text-white mt-4 uppercase tracking-[0.4em] inline-block border-y border-neutral-900 py-3">{typeDetail?.name}</h4>
-               <p className="text-sm text-neutral-400 italic mt-8 px-6 leading-relaxed max-w-xs mx-auto font-light">「 {typeDetail?.description} 」</p>
-            </div>
-
-            <div className="w-full space-y-16 px-4">
-              {Object.entries(DIMENSION_DESCRIPTIONS).map(([key, config]) => {
-                const score = result.vector[key as Dimension];
-                const percentage = ((score + 6) / 12) * 100;
-                const side = score > 0 ? 'left' : 'right';
-                const info = (config as any)[side];
-
-                return (
-                  <div key={key} className="relative">
-                    <div className="flex justify-between items-end mb-4">
-                       <div className={`transition-all duration-700 ${side === 'left' ? 'opacity-100' : 'opacity-25 scale-90'}`}>
-                          <span className="text-4xl font-black font-accent block leading-none text-white">{config.left.char}</span>
-                          <span className="text-[8px] font-bold text-neutral-400 uppercase tracking-widest">{config.left.name}</span>
-                       </div>
-                       <span className="text-[7px] text-neutral-500 uppercase tracking-widest mb-1 font-bold">{config.label.split(' ')[0]}</span>
-                       <div className={`transition-all duration-700 text-right ${side === 'right' ? 'opacity-100' : 'opacity-25 scale-90'}`}>
-                          <span className="text-4xl font-black font-accent block leading-none text-white">{config.right.char}</span>
-                          <span className="text-[8px] font-bold text-neutral-400 uppercase tracking-widest">{config.right.name}</span>
-                       </div>
-                    </div>
-                    <div className="h-px w-full bg-neutral-900 relative">
-                       <div className="absolute top-1/2 -translate-y-1/2 h-3 w-3 bg-white rotate-45 transition-all duration-1000 shadow-[0_0_10px_white]" style={{ left: `calc(${percentage}% - 6px)` }}></div>
-                    </div>
-                    <p className="text-xs text-neutral-400 mt-6 leading-relaxed font-light pl-4 border-l border-neutral-900">
-                      <span className="text-white font-bold mr-2">[{info.char}]</span>{info.desc}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-            <button onClick={() => window.location.reload()} className="mt-20 mb-8 px-8 py-4 border border-neutral-900 text-[10px] text-neutral-500 uppercase tracking-widest active:bg-white active:text-black transition-colors">Recalibrate System</button>
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-black to-transparent pointer-events-none"></div>
-      </div>
-    );
-  };
-
   return (
     <Layout onVersionClick={handleVersionClick}>
       {currentStep === 'welcome' && renderWelcome()}
       {currentStep === 'test' && renderTest()}
       {currentStep === 'survey' && renderSurvey()}
-      {currentStep === 'result' && renderResult()}
+      {currentStep === 'result' && result && (
+        <ResultView
+          result={result}
+          resultImage={resultImage}
+          loading={loading}
+          loadingText={loadingText}
+          onRetry={() => window.location.reload()}
+        />
+      )}
       {currentStep === 'admin' && renderAdmin()}
     </Layout>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainFlow />} />
+        {/* Support basic path on GitHub Pages too if needed */}
+        <Route path="/result/:id" element={<SharedResultPage />} />
+      </Routes>
+    </Router>
   );
 };
 
