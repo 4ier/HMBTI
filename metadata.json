@@ -1,0 +1,7 @@
+{
+  "name": "HMBTI - Heavy Music Beholder Type Indicator",
+  "description": "A professional assessment tool to identify your heavy music experience orientation using a 4-dimension framework (I/E, B/C, O/X, G/F). Includes AI-generated visual aesthetics based on your unique type.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
