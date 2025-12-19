@@ -68,53 +68,53 @@ export const DIMENSION_DESCRIPTIONS = {
 };
 
 export const SCORING_MAP: Record<string, { dimension: string; weight: number }> = {
-  // I_E
+  // I_E: 1 means I (Introversion), -1 means E (Extroversion)
   '1e000001-0000-4000-8000-000000000001': { dimension: 'I_E', weight: 1 },
-  '1e000002-0000-4000-8000-000000000002': { dimension: 'I_E', weight: -1 },
+  '1e000002-0000-4000-8000-000000000002': { dimension: 'I_E', weight: 1 },
   '1e000003-0000-4000-8000-000000000003': { dimension: 'I_E', weight: 1 },
-  '1e000004-0000-4000-8000-000000000004': { dimension: 'I_E', weight: -1 },
+  '1e000004-0000-4000-8000-000000000004': { dimension: 'I_E', weight: 1 },
   '1e000005-0000-4000-8000-000000000005': { dimension: 'I_E', weight: 1 },
-  '1e000006-0000-4000-8000-000000000006': { dimension: 'I_E', weight: -1 },
+  '1e000006-0000-4000-8000-000000000006': { dimension: 'I_E', weight: 1 },
   '1e000007-0000-4000-8000-000000000007': { dimension: 'I_E', weight: 1 },
-  '1e000008-0000-4000-8000-000000000008': { dimension: 'I_E', weight: -1 },
+  '1e000008-0000-4000-8000-000000000008': { dimension: 'I_E', weight: 1 },
   '1e000009-0000-4000-8000-000000000009': { dimension: 'I_E', weight: 1 },
-  '1e00000a-0000-4000-8000-00000000000a': { dimension: 'I_E', weight: -1 },
+  '1e00000a-0000-4000-8000-00000000000a': { dimension: 'I_E', weight: 1 },
 
-  // C_B
-  'c0000001-0000-4000-8000-000000000001': { dimension: 'C_B', weight: -1 },
+  // C_B: 1 means B (Being), -1 means C (Catharsis)
+  'c0000001-0000-4000-8000-000000000001': { dimension: 'C_B', weight: 1 },
   'c0000002-0000-4000-8000-000000000002': { dimension: 'C_B', weight: 1 },
-  'c0000003-0000-4000-8000-000000000003': { dimension: 'C_B', weight: -1 },
+  'c0000003-0000-4000-8000-000000000003': { dimension: 'C_B', weight: 1 },
   'c0000004-0000-4000-8000-000000000004': { dimension: 'C_B', weight: 1 },
-  'c0000005-0000-4000-8000-000000000005': { dimension: 'C_B', weight: -1 },
+  'c0000005-0000-4000-8000-000000000005': { dimension: 'C_B', weight: 1 },
   'c0000006-0000-4000-8000-000000000006': { dimension: 'C_B', weight: 1 },
-  'c0000007-0000-4000-8000-000000000007': { dimension: 'C_B', weight: -1 },
+  'c0000007-0000-4000-8000-000000000007': { dimension: 'C_B', weight: 1 },
   'c0000008-0000-4000-8000-000000000008': { dimension: 'C_B', weight: 1 },
-  'c0000009-0000-4000-8000-000000000009': { dimension: 'C_B', weight: -1 },
+  'c0000009-0000-4000-8000-000000000009': { dimension: 'C_B', weight: 1 },
   'c000000a-0000-4000-8000-00000000000a': { dimension: 'C_B', weight: 1 },
 
-  // O_X
+  // O_X: 1 means O (Order), -1 means X (X-Challenge)
   '0a000001-0000-4000-8000-000000000001': { dimension: 'O_X', weight: 1 },
-  '0a000002-0000-4000-8000-000000000002': { dimension: 'O_X', weight: -1 },
+  '0a000002-0000-4000-8000-000000000002': { dimension: 'O_X', weight: 1 },
   '0a000003-0000-4000-8000-000000000003': { dimension: 'O_X', weight: 1 },
-  '0a000004-0000-4000-8000-000000000004': { dimension: 'O_X', weight: -1 },
+  '0a000004-0000-4000-8000-000000000004': { dimension: 'O_X', weight: 1 },
   '0a000005-0000-4000-8000-000000000005': { dimension: 'O_X', weight: 1 },
-  '0a000006-0000-4000-8000-000000000006': { dimension: 'O_X', weight: -1 },
+  '0a000006-0000-4000-8000-000000000006': { dimension: 'O_X', weight: 1 },
   '0a000007-0000-4000-8000-000000000007': { dimension: 'O_X', weight: 1 },
-  '0a000008-0000-4000-8000-000000000008': { dimension: 'O_X', weight: -1 },
+  '0a000008-0000-4000-8000-000000000008': { dimension: 'O_X', weight: 1 },
   '0a000009-0000-4000-8000-000000000009': { dimension: 'O_X', weight: 1 },
-  '0a00000a-0000-4000-8000-00000000000a': { dimension: 'O_X', weight: -1 },
+  '0a00000a-0000-4000-8000-00000000000a': { dimension: 'O_X', weight: 1 },
 
-  // G_F
+  // G_F: 1 means G (Genesis), -1 means F (Future)
   'f0000001-0000-4000-8000-000000000001': { dimension: 'G_F', weight: 1 },
-  'f0000002-0000-4000-8000-000000000002': { dimension: 'G_F', weight: -1 },
+  'f0000002-0000-4000-8000-000000000002': { dimension: 'G_F', weight: 1 },
   'f0000003-0000-4000-8000-000000000003': { dimension: 'G_F', weight: 1 },
-  'f0000004-0000-4000-8000-000000000004': { dimension: 'G_F', weight: -1 },
+  'f0000004-0000-4000-8000-000000000004': { dimension: 'G_F', weight: 1 },
   'f0000005-0000-4000-8000-000000000005': { dimension: 'G_F', weight: 1 },
-  'f0000006-0000-4000-8000-000000000006': { dimension: 'G_F', weight: -1 },
+  'f0000006-0000-4000-8000-000000000006': { dimension: 'G_F', weight: 1 },
   'f0000007-0000-4000-8000-000000000007': { dimension: 'G_F', weight: 1 },
-  'f0000008-0000-4000-8000-000000000008': { dimension: 'G_F', weight: -1 },
+  'f0000008-0000-4000-8000-000000000008': { dimension: 'G_F', weight: 1 },
   'f0000009-0000-4000-8000-000000000009': { dimension: 'G_F', weight: 1 },
-  'f000000a-0000-4000-8000-00000000000a': { dimension: 'G_F', weight: -1 },
+  'f000000a-0000-4000-8000-00000000000a': { dimension: 'G_F', weight: 1 },
 };
 
 export const TYPE_DETAILS: TypeDetail[] = [

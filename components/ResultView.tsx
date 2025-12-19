@@ -66,6 +66,23 @@ export const ResultView: React.FC<ResultViewProps> = ({
             <div ref={scrollRef} className="flex-grow overflow-y-auto pb-10 pr-1 select-none custom-scrollbar">
                 <div className="flex flex-col items-center">
 
+                    {/* Action Buttons - Moved to top as requested */}
+                    <div className="w-full max-w-md px-8 mb-8 space-y-4">
+                        <button
+                            onClick={handleExportImage}
+                            disabled={generatingShare || loading}
+                            className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-neutral-200 transition-colors disabled:opacity-50"
+                        >
+                            {generatingShare ? 'Generating Artifact...' : 'Save & Share Visual'}
+                        </button>
+
+                        {onRetry ? (
+                            <button onClick={onRetry} className="w-full py-4 border border-neutral-900 text-[10px] text-neutral-500 uppercase tracking-widest active:bg-white active:text-black transition-colors">Recalibrate System</button>
+                        ) : (
+                            <a href={homeUrl} className="block w-full text-center py-4 border border-neutral-900 text-[10px] text-neutral-500 uppercase tracking-widest active:bg-white active:text-black transition-colors">Initialize Your Own Assessment</a>
+                        )}
+                    </div>
+
                     {/* Capture Area Start */}
                     <div ref={cardRef} className="relative flex flex-col items-center w-full max-w-md bg-black p-4 md:p-8">
 
@@ -92,8 +109,17 @@ export const ResultView: React.FC<ResultViewProps> = ({
                         <div className="w-full space-y-16 px-4 mb-20">
                             {Object.entries(DIMENSION_DESCRIPTIONS).map(([key, config]) => {
                                 const score = result.vector[key as Dimension];
-                                const percentage = ((score + 6) / 12) * 100;
-                                const side = score > 0 ? 'left' : 'right';
+                                // Max score per dimension: 6 questions * 1.5 = 9.
+                                // Range is -9 to 9.
+                                // C_B: Positive (+) points to B (Right).
+                                // Others (I_E, O_X, G_F): Positive (+) points to Left (I, O, G).
+
+                                const isPositiveRight = key === 'C_B';
+                                const percentage = isPositiveRight
+                                    ? ((score + 9) / 18) * 100 // -9 is C (0%), +9 is B (100%)
+                                    : ((9 - score) / 18) * 100; // +9 is I (0%), -9 is E (100%)
+
+                                const side = percentage > 50 ? 'right' : 'left';
                                 const info = (config as any)[side];
 
                                 return (
@@ -134,23 +160,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
                     </div>
                     {/* Capture Area End */}
-
-                    {/* Action Buttons */}
-                    <div className="w-full max-w-md px-8 space-y-4">
-                        <button
-                            onClick={handleExportImage}
-                            disabled={generatingShare || loading}
-                            className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-neutral-200 transition-colors disabled:opacity-50"
-                        >
-                            {generatingShare ? 'Generating Artifact...' : 'Save & Share Visual'}
-                        </button>
-
-                        {onRetry ? (
-                            <button onClick={onRetry} className="w-full py-4 border border-neutral-900 text-[10px] text-neutral-500 uppercase tracking-widest active:bg-white active:text-black transition-colors">Recalibrate System</button>
-                        ) : (
-                            <a href={homeUrl} className="block w-full text-center py-4 border border-neutral-900 text-[10px] text-neutral-500 uppercase tracking-widest active:bg-white active:text-black transition-colors">Initialize Your Own Assessment</a>
-                        )}
-                    </div>
 
                 </div>
             </div>
